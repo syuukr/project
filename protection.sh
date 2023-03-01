@@ -7,8 +7,6 @@ fi
 
 BRC="139.162.102.145"
 
-nft flush chain inet filter input
-
 iptables -I INPUT -m state -s 0.0.0.0/0 -p all --state ESTABLISHED,RELATED -j ACCEPT
 
 # Explicitly drop invalid incoming traffic
