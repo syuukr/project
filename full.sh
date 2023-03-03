@@ -82,6 +82,13 @@ iptables -t mangle -I PREROUTING -p tcp -m conntrack --ctstate NEW -m tcpmss ! -
 # Block SYN sPort less than 1024
 iptables -t raw -I PREROUTING -p tcp --syn ! --sport 1024:65535 -j DROP
 
+# Block all packets from broadcast
+# Helps fight off Fraggle attacks & Smurf attacks
+iptables -t raw -I PREROUTING -m pkttype --pkt-type broadcast -j DROP
+
+# Block IPv4 Packets with SSR
+iptables -t raw -A PREROUTING -m ipv4options --ssrr -j DROP
+
 # Block port scanners (stealth also)
 iptables -A INPUT -m state --state NEW -p tcp --tcp-flags ALL ALL -j DROP
 iptables -A INPUT -m state --state NEW -p tcp --tcp-flags ALL NONE -j DROP
