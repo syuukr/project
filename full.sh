@@ -5,6 +5,9 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
+systemctl stop ufw
+systemctl disable ufw
+
 BRC="139.162.102.145"
 
 iptables -I INPUT -m state -s 0.0.0.0/0 -p all --state ESTABLISHED,RELATED -j ACCEPT
