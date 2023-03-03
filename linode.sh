@@ -23,6 +23,11 @@ iptables -A INPUT -m state --state INVALID -j DROP
 iptables -A OUTPUT -m state --state INVALID -j DROP
 iptables -A FORWARD -m state --state INVALID -j DROP
 
+# Limit outgoing ICMP Port-unreachable messages
+# Helps fight off UDP DDoS on random destination ports
+iptables -t raw -A OUTPUT -p icmp --icmp-type port-unreach -m limit --limit 11/m -j ACCEPT
+iptables -t raw -A OUTPUT -p icmp --icmp-type port-unreach -j DROP
+
 # Block bogus TCP flags
 # Helps fight off TCP Null Attack, TCP XMAS Attack,
 # And other attack types with invalid TCP Flags.
