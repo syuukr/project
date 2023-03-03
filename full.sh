@@ -8,8 +8,6 @@ fi
 systemctl stop ufw
 systemctl disable ufw
 
-BRC="139.162.102.145"
-
 iptables -I INPUT -m state -s 0.0.0.0/0 -p all --state ESTABLISHED,RELATED -j ACCEPT
 
 # Block some Layer3 Protocols
@@ -150,8 +148,6 @@ sysctl -w net/netfilter/nf_conntrack_max=2000000
 
 sh -c 'echo 2000000 > /sys/module/nf_conntrack/parameters/hashsize'
 
-iptables -t nat -A PREROUTING -p tcp --dport 23:65534 -j DNAT --to-destination "$BRC"
-iptables -t nat -A PREROUTING -p tcp --dport 1:21 -j DNAT --to-destination "$BRC"
 iptables -t nat -A POSTROUTING -j MASQUERADE
 
 # Apply sysctl
