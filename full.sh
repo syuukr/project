@@ -18,7 +18,6 @@ iptables -t raw -A PREROUTING -p esp -j REJECT --reject-with tcp-reset
 iptables -t raw -A PREROUTING -p gre -j REJECT --reject-with tcp-reset
 iptables -t raw -A PREROUTING -p ah -j REJECT --reject-with icmp-proto-unreachable
 
-
 # Explicitly drop invalid traffic
 iptables -A INPUT -m state --state INVALID -j DROP
 iptables -A OUTPUT -m state --state INVALID -j DROP
@@ -48,6 +47,10 @@ iptables -t raw -I PREROUTING -s 127.0.0.0/8 ! -i lo -j DROP
 # Helps fight off UDP-NULL, TCP-NULL attacks
 iptables -t raw -I PREROUTING -p tcp -m length --length 0 -j DROP
 # iptables -t raw -I PREROUTING -p udp -m length --length 0 -j DROP
+
+# Limit incoming TCP RST and TCP FIN packets
+iptables -t raw -A PREROUTING -p tcp --tcp-flags RST RST -m limit --limit 2/s --limit-burst 3 -j ACCEPT
+iptables -t raw -A PREROUTING -p tcp --tcp-flags RST RST -j DROP
 
 # Drop UDP and TCP packets with incorrect source port
 iptables -t raw -I PREROUTING -p tcp ! --sport 0:65535 -j DROP
