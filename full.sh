@@ -43,6 +43,11 @@ iptables -t raw -A PREROUTING -p tcp --tcp-flags ALL ALL -j DROP
 # Block LAND and BLAT Attack
 iptables -t raw -I PREROUTING -s 127.0.0.0/8 ! -i lo -j DROP
 
+# Limit incoming DNS and NTP packets
+# iptables -t raw -A PREROUTING -p udp --sport 123 -m limit --limit 2/s --limit-burst 1 -j ACCEPT
+# iptables -t raw -A PREROUTING -p udp --sport 53 -m limit --limit 4/s --limit-burst 10 -j ACCEPT
+# iptables -t raw -A PREROUTING -p udp -m multiport --sports 53,123,17185,7001,1900,9000 -j DROP
+
 # Block zero-length TCP and UDP
 # Helps fight off UDP-NULL, TCP-NULL attacks
 iptables -t raw -I PREROUTING -p tcp -m length --length 0 -j DROP
