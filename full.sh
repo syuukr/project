@@ -56,6 +56,12 @@ iptables -t raw -A PREROUTING -p tcp --tcp-flags RST RST -j DROP
 iptables -t raw -I PREROUTING -p tcp ! --sport 0:65535 -j DROP
 # iptables -t raw -I PREROUTING -p udp ! --sport 0:65535 -j DROP
 
+# Block SYNOPT-ACK Method
+iptables -t raw -A PREROUTING -p tcp --sport 21 --dport 21 --tcp-flags SYN,ACK SYN,ACK -j DROP
+
+# Block UDP to SSH
+# iptables -t raw -A PREROUTING -p udp --dport $SSH -j REJECT --reject-with icmp-port-unreach
+
 # Drop all fragmented packets
 # Helps fight off fragmented floods
 iptables -t raw -I PREROUTING -f -j DROP
