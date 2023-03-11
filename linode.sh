@@ -162,6 +162,9 @@ iptables -t raw -A PREROUTING -m string --algo bm --from 28 --to 29 --string "fa
 iptables -t raw -A PREROUTING -p udp -m u32 --u32 "28 & 0x00FF00FF = 0x00200020 && 32 & 0x00FF00FF = 0x00200020 && 36 & 0x00FF00FF = 0x00200020 && 40 & 0x00FF00FF = 0x00200020" -j DROP
 iptables -t raw -A PREROUTING -p udp -m udp -m string --hex-string "|53414d50|" --algo kmp --from 28 --to 29 -j DROP 
 
+# Block blue syn
+iptables -A PREROUTING -t raw -p tcp -m length --length 9039 -m bpf --bytecode "7,48 0 0 0,84 0 0 240,21 0 3 64,48 0 0 28,53 0 1 1,6 0 0 65535,6 0 0 0 " -m comment --comment "bluesyn" -j DROP
+
 # Set syn proxy
 iptables -I PREROUTING -p tcp -m tcp --dport 1:65535 --tcp-flags FIN,SYN,RST,ACK SYN -j CT --notrack
 iptables -I INPUT -p tcp -m tcp --dport 1:65535 -m state --state INVALID,UNTRACKED -j SYNPROXY --sack-perm --timestamp --wscale 7 --mss 1460
