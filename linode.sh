@@ -10,6 +10,41 @@ apt install iptables
 
 # iptables -I INPUT -m state -s 0.0.0.0/0 -p all --state ESTABLISHED,RELATED -j ACCEPT
 
+# Block zero-length TCP and UDP
+# Helps fight off UDP-NULL, TCP-NULL attacks
+iptables -t raw -I PREROUTING -p tcp -m length --length 0 -j DROP
+iptables -t raw -I PREROUTING -p udp -m length --length 0 -j DROP
+
+# Drop UDP and TCP packets with incorrect source port
+iptables -t raw -I PREROUTING -p tcp ! --sport 0:65535 -j DROP
+iptables -t raw -I PREROUTING -p udp ! --sport 0:65535 -j DROP
+
+# Drop all fragmented packets
+# Helps fight off fragmented floods
+iptables -t raw -I PREROUTING -f -j DROP
+
+# Block new packets that not SYN
+# And block pattern of most used ACK Flood type
+# Helps fight off TCP ACK/FIN/RST floods
+iptables -t mangle -I PREROUTING -p tcp ! --syn -m conntrack --ctstate NEW -j DROP
+iptables -t raw -I PREROUTING -p tcp --tcp-flags ACK,FIN FIN -j DROP
+
+# Block unusual TCP MSS Value
+iptables -t mangle -I PREROUTING -p tcp -m conntrack --ctstate NEW -m tcpmss ! --mss 536:65535 -j DROP
+
+# Block SYN sPort less than 1024
+iptables -t raw -I PREROUTING -p tcp --syn ! --sport 1024:65535 -j DROP
+
+# Block all packets from broadcast
+# Helps fight off Fraggle attacks & Smurf attacks
+iptables -t raw -I PREROUTING -m pkttype --pkt-type broadcast -j DROP
+
+# TCP Patches
+iptables -t raw -I PREROUTING -p tcp -m length --length 40 -m string --algo bm --string "0xd3da" -m state --state ESTABLISHED -j DROP
+iptables -t raw -I PREROUTING -p tcp -m length --length 40 -m string --algo bm --string "0x912e" -m state --state ESTABLISHED -j DROP
+iptables -t raw -I PREROUTING -p tcp -m length --length 40 -m string --algo bm --string "0x0c54" -m state --state ESTABLISHED -j DROP
+iptables -t raw -I PREROUTING -p tcp -m length --length 40 -m string --algo bm --string "0x38d3" -m state --state ESTABLISHED -j DROP
+
 # Block some Layer3 Protocols
 # Helps fight off ESP/GRE/AH floods
 # If you need these protocols - uncomment these rules,
@@ -53,18 +88,9 @@ iptables -t raw -A PREROUTING -p udp --sport 123 -m limit --limit 2/s --limit-bu
 iptables -t raw -A PREROUTING -p udp --sport 53 -m limit --limit 4/s --limit-burst 10 -j ACCEPT
 iptables -t raw -A PREROUTING -p udp -m multiport --sports 53,123,17185,7001,1900,9000 -j DROP
 
-# Block zero-length TCP and UDP
-# Helps fight off UDP-NULL, TCP-NULL attacks
-iptables -t raw -I PREROUTING -p tcp -m length --length 0 -j DROP
-iptables -t raw -I PREROUTING -p udp -m length --length 0 -j DROP
-
 # Limit incoming TCP RST and TCP FIN packets
 iptables -t raw -A PREROUTING -p tcp --tcp-flags RST RST -m limit --limit 2/s --limit-burst 3 -j ACCEPT
 iptables -t raw -A PREROUTING -p tcp --tcp-flags RST RST -j DROP
-
-# Drop UDP and TCP packets with incorrect source port
-iptables -t raw -I PREROUTING -p tcp ! --sport 0:65535 -j DROP
-iptables -t raw -I PREROUTING -p udp ! --sport 0:65535 -j DROP
 
 # Block SYNOPT-ACK Method
 iptables -t raw -A PREROUTING -p tcp --sport 21 --dport 21 --tcp-flags SYN,ACK SYN,ACK -j DROP
@@ -72,29 +98,9 @@ iptables -t raw -A PREROUTING -p tcp --sport 21 --dport 21 --tcp-flags SYN,ACK S
 # Block UDP to SSH
 # iptables -t raw -A PREROUTING -p udp --dport $SSH -j REJECT --reject-with icmp-port-unreach
 
-# Drop all fragmented packets
-# Helps fight off fragmented floods
-iptables -t raw -I PREROUTING -f -j DROP
-
 # Block invalid SNMP Length
 iptables -t raw -A PREROUTING -p udp --sport 161 -m length --length 2536 -j DROP
 iptables -t raw -A PREROUTING -p udp --sport 161 -m length --length 1244 -j DROP
-
-# Block new packets that not SYN
-# And block pattern of most used ACK Flood type
-# Helps fight off TCP ACK/FIN/RST floods
-iptables -t mangle -I PREROUTING -p tcp ! --syn -m conntrack --ctstate NEW -j DROP
-iptables -t raw -I PREROUTING -p tcp --tcp-flags ACK,FIN FIN -j DROP
-
-# Block unusual TCP MSS Value
-iptables -t mangle -I PREROUTING -p tcp -m conntrack --ctstate NEW -m tcpmss ! --mss 536:65535 -j DROP
-
-# Block SYN sPort less than 1024
-iptables -t raw -I PREROUTING -p tcp --syn ! --sport 1024:65535 -j DROP
-
-# Block all packets from broadcast
-# Helps fight off Fraggle attacks & Smurf attacks
-iptables -t raw -I PREROUTING -m pkttype --pkt-type broadcast -j DROP
 
 # Block IPv4 Packets with SSR
 iptables -t raw -A PREROUTING -m ipv4options --ssrr -j DROP
@@ -110,12 +116,6 @@ iptables -t raw -A PREROUTING -m string --algo bm --string "\x77\x47\x5E\x27\x7A
 
 # SAO-UDP Bypass payload
 iptables -t raw -A PREROUTING -m string --algo bm --string "UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU" -j DROP
-
-# TCP Patches
-iptables -t raw -I PREROUTING -p tcp -m length --length 40 -m string --algo bm --string "0xd3da" -m state --state ESTABLISHED -j DROP
-iptables -t raw -I PREROUTING -p tcp -m length --length 40 -m string --algo bm --string "0x912e" -m state --state ESTABLISHED -j DROP
-iptables -t raw -I PREROUTING -p tcp -m length --length 40 -m string --algo bm --string "0x0c54" -m state --state ESTABLISHED -j DROP
-iptables -t raw -I PREROUTING -p tcp -m length --length 40 -m string --algo bm --string "0x38d3" -m state --state ESTABLISHED -j DROP
 
 # Botnet Attack filters
 iptables -t raw -A PREROUTING -p udp -m u32 --u32 "2&0xFFFF=0x2:0x0100" -j DROP
