@@ -51,9 +51,9 @@ iptables -t raw -I PREROUTING -p tcp -m length --length 40 -m string --algo bm -
 # Helps fight off ESP/GRE/AH floods
 # If you need these protocols - uncomment these rules,
 # or set PBA variable to ACCEPT
-iptables -t raw -A PREROUTING -p esp -j REJECT --reject-with tcp-reset
-iptables -t raw -A PREROUTING -p gre -j REJECT --reject-with tcp-reset
-iptables -t raw -A PREROUTING -p ah -j REJECT --reject-with icmp-proto-unreachable
+# iptables -t raw -A PREROUTING -p esp -j REJECT --reject-with tcp-reset
+# iptables -t raw -A PREROUTING -p gre -j REJECT --reject-with tcp-reset
+# iptables -t raw -A PREROUTING -p ah -j REJECT --reject-with icmp-proto-unreachable
 
 # Explicitly drop invalid traffic
 iptables -t raw -A PREROUTING -m state --state INVALID -j DROP
