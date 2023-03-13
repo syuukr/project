@@ -100,8 +100,10 @@ iptables -t raw -I PREROUTING -m pkttype --pkt-type broadcast -j DROP
 iptables -t raw -A PREROUTING -m ipv4options --ssrr -j DROP
 
 # Block port scanners (stealth also)
-iptables -A INPUT -m state --state NEW -p tcp --tcp-flags ALL ALL -j DROP
-iptables -A INPUT -m state --state NEW -p tcp --tcp-flags ALL NONE -j DROP
+# iptables -A INPUT -m state --state NEW -p tcp --tcp-flags ALL ALL -j DROP
+# iptables -A INPUT -m state --state NEW -p tcp --tcp-flags ALL NONE -j DROP
+iptables -t raw -A PREROUTING -m state --state NEW -p tcp --tcp-flags ALL ALL -j DROP
+iptables -t raw -A PREROUTING --state NEW -p tcp --tcp-flags ALL NONE -j DROP
 
 # OVH Bypass payload
 iptables -t raw -A PREROUTING -m string --algo bm --string "\x77\x47\x5E\x27\x7A\x4E\x09\xF7\xC7\xC0\xE6" -j DROP
@@ -163,7 +165,7 @@ iptables -t raw -A PREROUTING -p udp -m u32 --u32 "28 & 0x00FF00FF = 0x00200020 
 iptables -t raw -A PREROUTING -p udp -m udp -m string --hex-string "|53414d50|" --algo kmp --from 28 --to 29 -j DROP 
 
 # Block blue syn
-iptables -A PREROUTING -t raw -p tcp -m length --length 9039 -m bpf --bytecode "7,48 0 0 0,84 0 0 240,21 0 3 64,48 0 0 28,53 0 1 1,6 0 0 65535,6 0 0 0 " -m comment --comment "bluesyn" -j DROP
+iptables -t raw -A PREROUTING -p tcp -m length --length 9039 -m bpf --bytecode "7,48 0 0 0,84 0 0 240,21 0 3 64,48 0 0 28,53 0 1 1,6 0 0 65535,6 0 0 0 " -m comment --comment "bluesyn" -j DROP
 
 # Set syn proxy
 iptables -I PREROUTING -p tcp -m tcp --dport 1:65535 --tcp-flags FIN,SYN,RST,ACK SYN -j CT --notrack
