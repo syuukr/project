@@ -15,7 +15,7 @@ iptables -F
 # Block zero-length TCP and UDP
 # Helps fight off UDP-NULL, TCP-NULL attacks
 iptables -t raw -I PREROUTING -p tcp -m length --length 0 -j DROP
-iptables -t raw -I PREROUTING -p udp -m length --length 0 -j DROP
+# iptables -t raw -I PREROUTING -p udp -m length --length 0 -j DROP
 
 # Drop UDP and TCP packets with incorrect source port
 iptables -t raw -I PREROUTING -p tcp ! --sport 0:65535 -j DROP
