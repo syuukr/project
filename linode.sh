@@ -8,7 +8,7 @@ fi
 apt update
 apt install iptables
 
-iptables -I INPUT -m state -s 0.0.0.0/0 -p all --state ESTABLISHED,RELATED -j ACCEPT
+# iptables -I INPUT -m state -s 0.0.0.0/0 -p all --state ESTABLISHED,RELATED -j ACCEPT
 
 # Block some Layer3 Protocols
 # Helps fight off ESP/GRE/AH floods
@@ -19,9 +19,9 @@ iptables -t raw -A PREROUTING -p gre -j REJECT --reject-with tcp-reset
 iptables -t raw -A PREROUTING -p ah -j REJECT --reject-with icmp-proto-unreachable
 
 # Explicitly drop invalid traffic
-iptables -A INPUT -m state --state INVALID -j DROP
-iptables -A OUTPUT -m state --state INVALID -j DROP
-iptables -A FORWARD -m state --state INVALID -j DROP
+iptables -t raw -A PREROUTING -m state --state INVALID -j DROP
+iptables -t raw -A OUTPUT -m state --state INVALID -j DROP
+# iptables -A FORWARD -m state --state INVALID -j DROP
 
 # Limit outgoing ICMP Port-unreachable messages
 # Helps fight off UDP DDoS on random destination ports
