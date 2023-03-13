@@ -19,7 +19,7 @@ iptables -t raw -I PREROUTING -p udp -m length --length 0 -j DROP
 
 # Drop UDP and TCP packets with incorrect source port
 iptables -t raw -I PREROUTING -p tcp ! --sport 0:65535 -j DROP
-iptables -t raw -I PREROUTING -p udp ! --sport 0:65535 -j DROP
+# iptables -t raw -I PREROUTING -p udp ! --sport 0:65535 -j DROP
 
 # Drop all fragmented packets
 # Helps fight off fragmented floods
@@ -88,7 +88,7 @@ iptables -t raw -I PREROUTING -s 127.0.0.0/8 ! -i lo -j DROP
 # Limit incoming DNS and NTP packets
 iptables -t raw -A PREROUTING -p udp --sport 123 -m limit --limit 2/s --limit-burst 1 -j ACCEPT
 iptables -t raw -A PREROUTING -p udp --sport 53 -m limit --limit 4/s --limit-burst 10 -j ACCEPT
-iptables -t raw -A PREROUTING -p udp -m multiport --sports 53,123,17185,7001,1900,9000 -j DROP
+#   iptables -t raw -A PREROUTING -p udp -m multiport --sports 53,123,17185,7001,1900,9000 -j DROP
 
 # Limit incoming TCP RST and TCP FIN packets
 iptables -t raw -A PREROUTING -p tcp --tcp-flags RST RST -m limit --limit 2/s --limit-burst 3 -j ACCEPT
