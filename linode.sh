@@ -171,9 +171,8 @@ iptables -t raw -A PREROUTING -p udp -m udp -m string --hex-string "|53414d50|" 
 iptables -t raw -A PREROUTING -p tcp -m length --length 9039 -m bpf --bytecode "7,48 0 0 0,84 0 0 240,21 0 3 64,48 0 0 28,53 0 1 1,6 0 0 65535,6 0 0 0 " -m comment --comment "bluesyn" -j DROP
 
 # Set syn proxy
-iptables -I PREROUTING -p tcp -m tcp --dport 1:65535 --tcp-flags FIN,SYN,RST,ACK SYN -j CT --notrack
+iptables -I PREROUTING -p tcp -m tcp --tcp-flags FIN,SYN,RST,ACK SYN -j CT --notrack
 iptables -I INPUT -p tcp -m tcp --dport 1:65535 -m state --state INVALID,UNTRACKED -j SYNPROXY --sack-perm --timestamp --wscale 7 --mss 1460
-iptables -I INPUT -p tcp -m tcp --dport 1:65535 -m state --state INVALID -j DROP
 
 modprobe ip_conntrack
 
