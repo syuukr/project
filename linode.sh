@@ -129,9 +129,9 @@ iptables -t raw -A PREROUTING -p tcp --tcp-flags ACK ACK -m length --length 52 -
 iptables -t mangle -A PREROUTING -p tcp -syn -m length --length 52 -m string --algo bm --string "0xc838" -m state --state ESTABLISHED -j DROP
 
 # Suspicious string filters
-iptables -t raw -A PREROUTING -m string --algo bm --string "CRI" -j DROP
-iptables -t raw -A PREROUTING -m string --algo bm --string "STD" -j DROP
-iptables -t raw -A PREROUTING -m string --algo bm --string "std" -j DROP
+# iptables -t raw -A PREROUTING -m string --algo bm --string "CRI" -j DROP
+# iptables -t raw -A PREROUTING -m string --algo bm --string "STD" -j DROP
+# iptables -t raw -A PREROUTING -m string --algo bm --string "std" -j DROP
 iptables -t raw -A PREROUTING -m string --algo bm --string "SAAM" -j DROP
 iptables -t raw -A PREROUTING -m string --algo bm --string "ddos" -j DROP
 iptables -t raw -A PREROUTING -m string --algo bm --string "flood" -j DROP
@@ -144,6 +144,9 @@ iptables -t raw -A PREROUTING -m string --algo bm --string "0x000000000001" -j D
 iptables -t raw -A PREROUTING -p udp -m u32 --u32 "0>>22&0x3C@8" -j DROP
 iptables -t raw -A PREROUTING -p udp -m u32 --u32 "0>>22&0x3C@8&0xFF=42" -j DROP
 iptables -t raw -A PREROUTING -p udp -m u32 --u32 "0>>22&0x3C@8&0xFF" -j DROP
+
+# Block udp http 1.1
+iptables -t raw -A PREROUTING -m string --algo bm --string "HTTP/1.1" -j DROP
 
 # Block private bypasses
 iptables -t raw -A PREROUTING -p udp -m string --algo bm --hex-string "|424f4f5445524e4554|" -j DROP
