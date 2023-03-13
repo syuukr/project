@@ -101,8 +101,8 @@ iptables -t raw -A PREROUTING -p tcp --sport 21 --dport 21 --tcp-flags SYN,ACK S
 # iptables -t raw -A PREROUTING -p udp --dport $SSH -j REJECT --reject-with icmp-port-unreach
 
 # Block invalid SNMP Length
-iptables -t raw -A PREROUTING -p udp --sport 161 -m length --length 2536 -j DROP
-iptables -t raw -A PREROUTING -p udp --sport 161 -m length --length 1244 -j DROP
+# iptables -t raw -A PREROUTING -p udp --sport 161 -m length --length 2536 -j DROP
+# iptables -t raw -A PREROUTING -p udp --sport 161 -m length --length 1244 -j DROP
 
 # Block IPv4 Packets with SSR
 iptables -t raw -A PREROUTING -m ipv4options --ssrr -j DROP
