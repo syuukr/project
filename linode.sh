@@ -8,6 +8,8 @@ fi
 apt update
 apt install iptables
 
+iptables -F
+
 # iptables -I INPUT -m state -s 0.0.0.0/0 -p all --state ESTABLISHED,RELATED -j ACCEPT
 
 # Block zero-length TCP and UDP
